@@ -47,7 +47,7 @@ UI変更の実装のために、ベースとなる簡単なアプリケーショ
 必要に応じてご参照ください。
 
 //footnote[appendix-site][Appendixサイト: @<href>{https://seahawk-tiger.github.io/chainlit-ui-appendix/}]
-//footnote[finished-repo][変更後コードは以下のURLの @<code>{ch10-cyber-ui} ディレクトリを参照 @<href>{https://github.com/seahawk-tiger/chainlit-ui-playground/tree/main}]
+//footnote[finished-repo][変更後コードは以下のURLの @<code>{ch10-cyber-ui} ディレクトリから参照できます。 @<href>{https://github.com/statditto/chainlit-techbook-support}]
 
 //image[seahawk-qr-01][サンプルコード・AppendixサイトのQRコード][scale=0.6]
 
@@ -74,9 +74,8 @@ Figmaでスタイルガイド@<fn>{color-tokens}とデザイン案@<fn>{design-c
 
 //footnote[color-tokens][スタイルガイド: @<href>{https://seahawk-tiger.github.io/chainlit-ui-appendix/pages/appendix1-color-and-font.html}]
 //footnote[design-color][デザイン案: @<href>{https://seahawk-tiger.github.io/chainlit-ui-appendix/pages/appendix2-ui-design-proto.html}]
-//footnote[logo-file-url][ロゴのサンプルファイル: @<href>{https://github.com/seahawk-tiger/chainlit-ui-playground/tree/base/sample_files}]
+//footnote[logo-file-url][ロゴのサンプルファイルは@<hd>{sample-code}で紹介したGitHubで公開しています。]
 //footnote[logo-desc][ロゴの構成について: @<href>{https://seahawk-tiger.github.io/chainlit-ui-appendix/pages/appendix3-logo-structure.html}]
-//footnote[logo-file-ref][ロゴのサンプルファイルは@<hd>{design}を参照。]
 
 
 == 変更していこう
@@ -426,7 +425,7 @@ body:not(
 最後に、円形モチーフのロゴが回転するアニメーションを実装します。
 
 ロゴは半径・色・太さの異なる複数の円が重なった構造です。(詳細は @<hd>{design} からAppendixをご覧ください) 今回はそれぞれの円を異なるスピードで回転させることにします。すでにそれぞれのパーツを別々のSVGファイルで書き出してありますので、これらのファイルを使って2ステップに分けて実装していきます。
-その前に、SVGファイルは、@<code>{public}に@<code>{logos}というディレクトリを作ってまとめて格納しておきます@<fn>{logo-file-ref}。
+その前に、SVGファイルは、@<code>{public}に@<code>{logos}というディレクトリを作ってまとめて格納しておきます@<fn>{logo-file-url}。
 
 
 ===== ロゴを複数枚のSVGファイルの重ね合わせに置き換える @<br>{}
@@ -479,7 +478,7 @@ function replaceLoginLogo() {
 
 //image[seahawk-demomovie-qr][完成したUIのデモムービー][scale=0.3]
 
-== おわりに
+== まとめ
 セレクタを特定してCSSとJSで操作するという地味な作業が多い記事でしたが、フロントエンドの知識が乏しい中でもUIを変更できました。
 もっとデザインやフロントエンドの知識があればさらに派手な演出が実装できたかもしれない、と思いつつも、個人的にはこのデザインやアニメーションは気に入っています。
 また、一連の作業の中で、Chainlitの標準UIはシンプルで癖がなく、使いやすく設計されていると実感しました。
