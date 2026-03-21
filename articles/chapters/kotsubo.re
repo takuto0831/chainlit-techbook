@@ -2,7 +2,7 @@
 = AIが今何をしているか？で不安にならないようにしよう！
 
 //lead{
-LLMがツールを使って複雑な処理をこなすようになった今、応答が返るまでの「待ち時間」はユーザー体験の一つの課題です。@<chap>{uchiyama} では開発者目線での LLM の観察・デバッグを扱いましたが、本章では@<b>{ユーザー目線}に立ち、待ち時間の不安をどう解消するかに焦点を当てます。Chainlit を使い始めていてユーザー体験をさらに良くしたい方に向けて、@<code>{cl.Step} を起点に、Markdownによる構造化・@<code>{cl.TaskList} によるタスクの表示・@<code>{cl.Plotly} による結果の可視化・@<code>{asyncio.gather} を活用したメッセージの並行表示という4つのアプローチを紹介します。Chainlit を題材にしていますが、背景にある考え方は他のフレームワークにも通じるものです。
+LLM がツールを使って複雑な処理をこなすようになった今、応答が返るまでの「待ち時間」はユーザー体験の一つの課題です。@<chap>{uchiyama} では開発者目線での LLM の観察・デバッグを扱いましたが、本章では@<b>{ユーザー目線}に立ち、待ち時間の不安をどう解消するかに焦点を当てます。Chainlit を使い始めていてユーザー体験をさらに良くしたい方に向けて、@<code>{cl.Step} を起点に、Markdown による構造化・@<code>{cl.TaskList} によるタスクの表示・@<code>{cl.Plotly} による結果の可視化・@<code>{asyncio.gather} を活用したメッセージの並行表示という4つのアプローチを紹介します。Chainlit を題材にしていますが、背景にある考え方は他のフレームワークにも通じるものです。
 //}
 //pagebreak
 
@@ -25,7 +25,7 @@ LLM の精度向上とツールによる機能拡張が進むにつれ、1回の
 
 本章では、複数のトピックを検索するリサーチアプリケーション @<fn>{support} を例に、Chainlit の @<code>{cl.Step} 機能を中心に説明します。このアプリケーションは、ユーザーがブラウザから質問を送ると、OpenAI の @<code>{web_search_preview} ツールを使って複数のトピックをウェブ検索し、結果を集約して回答を返すチャットボットです。処理の流れは次のとおりです。
 
-//footnote[support][本章のソースコードは以下 @<code>{ch05-progress} ディレクトリから参照できます。@<href>{https://github.com/statditto/chainlit-techbook-support}]
+//footnote[support][本章のソースコードは以下のリポジトリの @<code>{ch05-progress} ディレクトリから参照できます。@<href>{https://github.com/statditto/chainlit-techbook-support}]
 
  1. ユーザーのクエリから調査トピックを3つ生成する
  2. 各トピックについてウェブ検索を行い、ソースごとに要約・信頼度を付与する
@@ -49,7 +49,7 @@ LLM の精度向上とツールによる機能拡張が進むにつれ、1回の
 
 //pagebreak
 
-//emlist[入れ子にした@<code>{cl.Step}の使い方]{
+//emlist[入れ子にした@<code>{cl.Step}の使い方][python]{
 async with cl.Step(name="親", type="tool") as parent:
     async with cl.Step(name="子", type="retrieval") as child:
         child.output = "子の結果"
@@ -60,7 +60,7 @@ async with cl.Step(name="親", type="tool") as parent:
 
 本章のアプリケーションでは、次のような3段階の入れ子構造で @<code>{cl.Step} を構成しています。
 
-//emlist[リサーチアプリケーションのベース実装]{
+//emlist[リサーチアプリケーションのベース実装][python]{
 @cl.on_message
 async def main(message: cl.Message) -> None:
     query = message.content
@@ -99,7 +99,7 @@ async def main(message: cl.Message) -> None:
 
 @<code>{generate_topics} は LLM にユーザーのクエリを渡し、調査すべき観点を複数の文字列（@<code>{topic}）として返す関数です。たとえば「Chainlit とは何か」というクエリに対して @<code>{["基本概念", "主な機能", "活用事例"]} のようなリストが返ります。各 @<code>{topic} に対してトピック Step が1つ生成され、その中でウェブ検索が実行されます。
 
-//emlist[@<code>{generate_topics}で利用しているプロンプト]{
+//emlist[@<code>{generate_topics}で利用しているプロンプト][python]{
 messages=[
     {
         "role": "system",
@@ -132,7 +132,7 @@ messages=[
 
 全トピックの調査が完了した後、集約結果を最終回答としてストリーミング表示します。@<code>{cl.Message} の @<code>{stream_token} メソッドを使うことで、LLM が生成するテキストを逐次的に画面へ反映できます。
 
-//emlist[最終回答のストリーミング表示]{
+//emlist[最終回答のストリーミング表示][python]{
 answer_msg = cl.Message(content="")
 await answer_msg.send()
 
@@ -158,7 +158,7 @@ await answer_msg.update()
 
 ベース実装では、トピック Step の @<code>{output} に「2 件のソースを確認しました」という単純なテキストを設定していました。ここを Markdown のテーブル形式に変更します。
 
-//emlist[Markdown テーブルを生成するフォーマッター]{
+//emlist[Markdown テーブルを生成するフォーマッター][python]{
 def fmt_topic_output(_topic: str, sites: list[dict]) -> str:
     rows = "\n".join(
         f"| [{s['name']}]({s['url']}) | `{urlparse(s['url']).netloc}`"
@@ -178,9 +178,11 @@ def fmt_topic_output(_topic: str, sites: list[dict]) -> str:
 //image[ui_markdown2][Markdown フォーマットを導入した Step 表示の例][scale=0.8]{
 //}
 
+ここで @<code>{fmt_topic_output} に渡す変数 @<code>{sites} は、次に紹介する @<code>{research_topic} 関数の戻り値です。@<code>{research_topic} がウェブ検索と要約を行い構造化データ（ソース名・URL・要約・信頼度）を返し、@<code>{fmt_topic_output} がそれを Markdown テーブルに整形して Step の @<code>{output} に設定するという役割分担になっています。
+
 @<code>{research_topic} は、OpenAI の @<code>{web_search_preview} ツールでウェブ検索を行い、取得したテキストと引用 URL を LLM に渡して構造化する関数です。内部では2回の API 呼び出しを行っています。1回目の @<code>{responses.create} でウェブ検索と要約を実行し、2回目の @<code>{chat.completions.create} で検索結果をソース名・URL・要約・信頼度の JSON 形式に整形します。以下は2回目の呼び出しで使用しているプロンプトです。
 
-//emlist[@<code>{research_topic}での文章の要約と信頼度を返すプロンプト]{
+//emlist[@<code>{research_topic}での文章の要約と信頼度を返すプロンプト][python]{
 {
     "role": "user",
     "content": (
@@ -209,7 +211,7 @@ Step のツリー表示は処理の「詳細」を確認するためのもので
 
 //pagebreak
 
-//emlist[TaskList と Task の追加]{
+//emlist[TaskList と Task の追加][python]{
 @cl.on_message
 async def main(message: cl.Message) -> None:
     task_list = cl.TaskList()
@@ -251,7 +253,7 @@ async def main(message: cl.Message) -> None:
 
 全トピックの調査完了後に、Plotly のインタラクティブなヒートマップを @<code>{cl.Plotly} で表示します。前の節で表示していた信頼度（★の数）を数値に変換し、「トピック × ソース番号」のマトリクスとして色で表現します。
 
-//emlist[Plotly ヒートマップの表示]{
+//emlist[Plotly ヒートマップの表示][python]{
 all_sites: list[dict] = []  # チャート用：topic 付きで全ソースを蓄積
 
 # ... 省略 ...
@@ -282,7 +284,7 @@ if all_sites:
 
 @<code>{asyncio.gather} を使って、「トピック生成」と「豆知識生成」を並行実行します。トピック生成が完了した時点で豆知識も揃っており、リサーチ開始と同時にユーザーへ関連情報を表示できます。
 
-//emlist[並行実行と豆知識の即時表示]{
+//emlist[並行実行と豆知識の即時表示][python]{
 @cl.on_message
 async def main(message: cl.Message) -> None:
     query = message.content
@@ -309,7 +311,7 @@ async def main(message: cl.Message) -> None:
 
 @<code>{generate_topics} は「リサーチアプリケーションの実装」節で紹介した関数です。@<code>{generate_trivia} はそれと並行して実行する新しい関数で、クエリに関連する豆知識を1件返します。
 
-//emlist[@<code>{generate_trivia} で利用しているプロンプト]{
+//emlist[@<code>{generate_trivia} で利用しているプロンプト][python]{
 messages=[
     {
         "role": "system",
